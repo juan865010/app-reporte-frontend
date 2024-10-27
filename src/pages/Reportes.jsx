@@ -67,7 +67,6 @@ const Reportes = () => {
     if (selection === 'noSolucionado') {
       activity.hideComentarios = true;  
   
-
       updatedSystems[system].activities.push({
         tipoEquipo: activity.tipoEquipo,   
         equipo: activity.equipo,           
@@ -78,7 +77,7 @@ const Reportes = () => {
         checkSolucionado: false,
         checkNoSolucionado: false,
         checkPendiente: false,
-        hideComentarios: false,
+        hideComentarios: false, 
         isSimpleView: true, 
       });
     }
@@ -109,76 +108,99 @@ const Reportes = () => {
   };
 
   const fallaOptions = {
-    FMS: ['GPS', 'Core', 'Antena', 'Display', 'Comunicacion', 'Alta precision', 'Cables', 'Conectores'],
-    OAS: ['GPS', 'Core', 'Comunicacion', 'Configuracion', 'Camara cabina', 'Camara Frontal', 'Cables', 'Conectores'],
-    CAS: ['Antena', 'Display', 'Comunicacion', 'Configuracion', 'Cables', 'Conectores'],
-    ITRACK: ['HUB', 'Sensores', 'Cables', 'Conectores'],
-    AXIS: ['Camara']
+    FMS: ['GPS', 'Core', 'Antena', 'Display', 'Comunicacion', 'Alta precision','Otro'],
+    OAS: ['GPS', 'Core', 'Comunicacion', 'Configuracion', 'Camara cabina', 'Camara frontal','Otro'],
+    CAS: ['GPS','Antena', 'Display', 'Comunicacion', 'Configuracion', 'Otro'],
+    ITRACK: ['HUB', 'Sensores','Otro'],
+    AXIS: ['Camara','Otro'],
+    WIFI: ['AP','Otro']
   };
-  const renderActividadSelectWithCheckbox = (sistema, activity, index) => (
-    <Grid container alignItems="center" spacing={1}>
-      <Grid item xs={8}>
-        <FormControl fullWidth variant="outlined">
-          <InputLabel htmlFor={`actividad-${index}`}>Actividad</InputLabel>
-          <Select
-            label="Actividad"
-            value={activity.actividad}
-            onChange={(e) => {
-              const updatedSystems = { ...systems };
-              updatedSystems[sistema].activities[index].actividad = e.target.value;
-              setSystems(updatedSystems);
-            }}
-            startAdornment={<InputAdornment position="start"><LightbulbIcon /></InputAdornment>}
-          >
-            <MenuItem value="Opcion1">Reubicacion de WAP</MenuItem>
-            <MenuItem value="Opcion2">Opción 2</MenuItem>
-            <MenuItem value="Opcion3">Opción 3</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
+
+  const actividadOptions = {
+    GPS: ['Reinicio remoto del equipo', 'Reinicio fisico del equipo', 'Reinicio desde Master switch','Ajuste y limpieza de conector','Cambio de GPS','Pendiente de revision','Soporte HxGN','Otro'],
+    Core: ['Reinicio del JAMS', 'Reinicio remoto de Core','Reinicio fisico de Core','Ajuste de conectores','Cambio de Core','Reinicio desde Master switch','Carga de configuracion','Pendiente de revision','Soporte HxGN','Otro'],
+    Antena:['Soporte HxGN','Otro'],
+    Display: ['Reinicio del JAMS','Reinicio fisico del Display','Ajuste de conector','Carga de configuracion','Pendiente de revision','Soporte HxGN','Otro'],
+    Comunicacion: ['Reinicio remoto de AP','Reinicio fisico de AP','Configuracion de AP','Reset de fabrica','Cambio de IP','Cambio de supresor de transientes','Reubicacaion de WAP','Soporte HxGN','Otro'],
+    'Alta precision': ['No marca profundidad de broca','No visualiza poligonos','GPS modo bad','GPS modo floating','Soporte HxGN','Otro'],
+    Configuracion: ['Soporte HxGN','Otro'],
+    'Camara cabina': ['Soporte HxGN','Otro'],
+    'Camara frontal': ['Soporte HxGN','Otro'],
+    HUB:['Soporte','Otro'],
+    Sensores:['Soporte','Otro'],
+  };
   
-      <Grid item xs={4}>
-        <Box sx={{ display: 'flex', gap: 1, ml: 1, alignItems: 'center' }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={activity.checkSolucionado}
-                onChange={() => handleCheckboxChange(sistema, index, 'solucionado')}
-                sx={{ transform: 'scale(0.8)' }}
-              />
-            }
-            label="S"
-            labelPlacement="end"
-            sx={{ fontSize: 12 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={activity.checkNoSolucionado}
-                onChange={() => handleCheckboxChange(sistema, index, 'noSolucionado')}
-                sx={{ transform: 'scale(0.8)' }}
-              />
-            }
-            label="N"
-            labelPlacement="end"
-            sx={{ fontSize: 12 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={activity.checkPendiente}
-                onChange={() => handleCheckboxChange(sistema, index, 'pendiente')}
-                sx={{ transform: 'scale(0.8)' }}
-              />
-            }
-            label="P"
-            labelPlacement="end"
-            sx={{ fontSize: 12 }}
-          />
-        </Box>
+  const renderActividadSelectWithCheckbox = (sistema, activity, index) => {
+    const availableActivities = actividadOptions[activity.falla] || ['Sin actividad disponible'];
+  
+    return (
+      <Grid container alignItems="center" spacing={1}>
+        <Grid item xs={8}>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel htmlFor={`actividad-${index}`}>Actividad</InputLabel>
+            <Select
+              label="Actividad"
+              value={activity.actividad}
+              onChange={(e) => {
+                const updatedSystems = { ...systems };
+                updatedSystems[sistema].activities[index].actividad = e.target.value;
+                setSystems(updatedSystems);
+              }}
+              startAdornment={<InputAdornment position="start"><LightbulbIcon /></InputAdornment>}
+            >
+              {availableActivities.map((opcion, i) => (
+                <MenuItem key={i} value={opcion}>
+                  {opcion}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+  
+        <Grid item xs={4}>
+          <Box sx={{ display: 'flex', gap: 1, ml: 1, alignItems: 'center' }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={activity.checkSolucionado}
+                  onChange={() => handleCheckboxChange(sistema, index, 'solucionado')}
+                  sx={{ transform: 'scale(0.8)' }}
+                />
+              }
+              label="S"
+              labelPlacement="end"
+              sx={{ fontSize: 12 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={activity.checkNoSolucionado}
+                  onChange={() => handleCheckboxChange(sistema, index, 'noSolucionado')}
+                  sx={{ transform: 'scale(0.8)' }}
+                />
+              }
+              label="N"
+              labelPlacement="end"
+              sx={{ fontSize: 12 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={activity.checkPendiente}
+                  onChange={() => handleCheckboxChange(sistema, index, 'pendiente')}
+                  sx={{ transform: 'scale(0.8)' }}
+                />
+              }
+              label="P"
+              labelPlacement="end"
+              sx={{ fontSize: 12 }}
+            />
+          </Box>
+        </Grid>
       </Grid>
-    </Grid>
-  );
+    );
+  };
+  
   
   
   const getIconForSystem = (system) => {
@@ -319,6 +341,7 @@ const Reportes = () => {
     <Grid item xs={1.5}>
       {renderMantenimientoSelect(sistema, activity, index)}
     </Grid>
+   
     <Grid item xs={2}>
       {renderSelectOrFixedInput(sistema, activity, index)}
     </Grid>
